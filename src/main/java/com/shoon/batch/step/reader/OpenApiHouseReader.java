@@ -41,20 +41,17 @@ public class OpenApiHouseReader implements ItemReader<List<HouseTradeDTO>> {
 
     @Override
     public List<HouseTradeDTO> read() throws Exception {
-        log.debug("Reading the information of the next HouseTrade");
-        log.debug("======== nextAddressSiGuIndex : " + lawDongIndex + "=========");
-
+        log.debug("Reading the information of the next HouseTrade, index = {}", lawDongIndex);
         lawDongInit();
 
         if (lawDongIndex >= lawDongList.size()) {
-            log.debug("nextAddressSiGuIndex is " + lawDongIndex + " and this job has finished.");
-            month = null;
-            lawDongIndex = 0;
-            lawDongList = null;
-            return null;
+            log.debug("lawDongIndex is " + lawDongIndex + " and this job has finished.");
+//            month = null;
+//            lawDongIndex = 0;
+//            lawDongList = null;
+            return null; // END
         }
 
-        log.debug("nextAddressSiGuIndex is " + lawDongIndex + " and this job is running.");
         long LawdCode = lawDongList.get(lawDongIndex++).getLdCode() / 100000; // 지역코드만 추출
         return fetchHouseTradeDTOFromAPI(LawdCode, month);
     }
@@ -62,17 +59,12 @@ public class OpenApiHouseReader implements ItemReader<List<HouseTradeDTO>> {
     private void lawDongInit() {
         if (lawDongList == null) {
             log.debug("Address info init..");
-            /**
-             * TODO : 테이블에 구/군 + 동에 대한 정보가 있어서 구/군에 대한 지역코드가 겹치는 문제
-             */
-            lawDongList = lawDongRepository.findAll();
+            lawDongList = lawDongRepository.findAllGroupByLawdCode();
         }
     }
 
     // 연립다세대 OPEN API 호출 , 요쳥변수 : LAWD_CD(지역코드) , DEAL_YMD(계약월)
     private List<HouseTradeDTO> fetchHouseTradeDTOFromAPI(long LawdCode, String month){
-        log.debug("Fetching houseTrade data from an external API by using the url: {}", resturl);
-
         try {
             URI uri = new URI(resturl + "?serviceKey=" + serviceKey + "&LAWD_CD=" + LawdCode + "&DEAL_YMD=" + month);
             log.info("===================================================");
