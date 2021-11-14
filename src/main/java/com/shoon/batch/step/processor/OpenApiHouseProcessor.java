@@ -7,8 +7,8 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Configuration
@@ -16,24 +16,20 @@ import java.util.List;
 public class OpenApiHouseProcessor implements ItemProcessor<List<HouseTradeDTO>, List<PropertyPrice>> {
     @Override
     public List<PropertyPrice> process(List<HouseTradeDTO> list) throws Exception {
-        if (list == null) return null;
+//        if (list == null) return null;
 
-        List<PropertyPrice> ret = new ArrayList<>();
-
-        for (HouseTradeDTO dto : list) {
-            PropertyPrice propertyPrice = PropertyPrice.builder()
-                    .amount(dto.get거래금액().trim())
-                    .area(Double.parseDouble(dto.get전용면적().trim()))
-                    .constructionYear(Integer.parseInt(dto.get건축년도().trim()))
-                    .date(dto.get년().trim() + "-" + dto.get월().trim() + "-" + dto.get일().trim())
-                    .dong(dto.get법정동().trim())
-                    .floor(Integer.parseInt(dto.get층().trim()))
-                    .landNum(dto.get대지권면적().trim())
-                    .locCode(dto.get지번().trim())
-                    .name(dto.get연립다세대().trim())
-                    .build();
-            ret.add(propertyPrice);
-        }
-        return ret;
+        return list.stream().map(
+                item -> PropertyPrice.builder()
+                        .amount(item.get거래금액().trim())
+                        .area(Double.parseDouble(item.get전용면적().trim()))
+                        .constructionYear(Integer.parseInt(item.get건축년도().trim()))
+                        .date(item.get년().trim() + "-" + item.get월().trim() + "-" + item.get일().trim())
+                        .dong(item.get법정동().trim())
+                        .floor(Integer.parseInt(item.get층().trim()))
+                        .landNum(item.get대지권면적().trim())
+                        .locCode(item.get지번().trim())
+                        .name(item.get연립다세대().trim())
+                        .build())
+                .collect(Collectors.toList());
     }
 }
