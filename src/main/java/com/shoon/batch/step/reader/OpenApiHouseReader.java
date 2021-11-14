@@ -44,6 +44,10 @@ public class OpenApiHouseReader implements ItemReader<List<HouseTradeDTO>> {
         log.debug("Reading the information of the next HouseTrade, index = {}", lawDongIndex);
         lawDongInit();
 
+        /**
+         * TODO : Open api 요청 수가 초과 되서 다른 service key 로 해당 코드가 문제없는지 체크
+         */
+
         if (lawDongIndex >= lawDongList.size()) {
             log.debug("lawDongIndex is " + lawDongIndex + " and this job has finished.");
 //            month = null;

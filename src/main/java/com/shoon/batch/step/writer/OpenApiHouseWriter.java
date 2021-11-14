@@ -17,10 +17,7 @@ public class OpenApiHouseWriter implements ItemWriter<List<PropertyPrice>> {
 
     @Override
     public void write(List<? extends List<PropertyPrice>> lists) throws Exception {
-        log.info("Received the information of {} array", lists.size());
-
         for (List<PropertyPrice> list : lists) {
-            log.info("연립다세대 실거래가 데이터 수신, ADW 트랜잭션 시작. [거래 건수 : " + list.size() + " 건]");
             propertyPriceRepository.saveAll(list);
             log.info("연립다세대 실거래가 데이터 수신, ADW 트랜잭션 종료. [거래 건수 : " + list.size() + " 건]");
         }

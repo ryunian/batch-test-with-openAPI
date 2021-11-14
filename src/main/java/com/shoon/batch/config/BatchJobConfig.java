@@ -78,16 +78,16 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public Job HouseTradeJob(Step houseTradeStep) {
-
+    public Job HouseTradeJob() {
         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
         threadPoolTaskExecutor.setCorePoolSize(CHUNK_AND_PAGE_SIZE);
         threadPoolTaskExecutor.afterPropertiesSet();
 
         Flow splitFlow = new FlowBuilder<Flow>("HouseTradeStepSplitFlow")
                 .split(threadPoolTaskExecutor)
-                .add(
-                        new FlowBuilder<Flow>("HouseTradeStepFlow").start(houseTradeStep).build()
+                .add(new FlowBuilder<Flow>("HouseTradeStepFlow")
+                        .start(HouseTradeStep())
+                        .build()
                 ).build();
 
         return jobBuilderFactory.get("국토부 전국 부동산 실거래가 데이터 수집")
