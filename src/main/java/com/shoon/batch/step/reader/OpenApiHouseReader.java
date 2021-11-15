@@ -44,15 +44,8 @@ public class OpenApiHouseReader implements ItemReader<List<HouseTradeDTO>> {
         log.debug("Reading the information of the next HouseTrade, index = {}", lawDongIndex);
         lawDongInit();
 
-        /**
-         * TODO : Open api 요청 수가 초과 되서 다른 service key 로 해당 코드가 문제없는지 체크
-         */
-
         if (lawDongIndex >= lawDongList.size()) {
             log.debug("lawDongIndex is " + lawDongIndex + " and this job has finished.");
-//            month = null;
-//            lawDongIndex = 0;
-//            lawDongList = null;
             return null; // END
         }
 
@@ -68,7 +61,8 @@ public class OpenApiHouseReader implements ItemReader<List<HouseTradeDTO>> {
     }
 
     // 연립다세대 OPEN API 호출 , 요쳥변수 : LAWD_CD(지역코드) , DEAL_YMD(계약월)
-    private List<HouseTradeDTO> fetchHouseTradeDTOFromAPI(long LawdCode, String month){
+    private List<HouseTradeDTO> fetchHouseTradeDTOFromAPI(long LawdCode, String month) {
+        List<HouseTradeDTO> houseTradeDTOList = new ArrayList<>();
         try {
             URI uri = new URI(resturl + "?serviceKey=" + serviceKey + "&LAWD_CD=" + LawdCode + "&DEAL_YMD=" + month);
             log.info("===================================================");
@@ -80,11 +74,19 @@ public class OpenApiHouseReader implements ItemReader<List<HouseTradeDTO>> {
             JsonNode root = mapper.readTree(response.getBody());
             JsonNode item = root.path("response").path("body").path("items").get("item");
 
-            return new ObjectMapper().readerFor(new TypeReference<List<HouseTradeDTO>>() {}).readValue(item);
-
+            if (item.isArray()) {
+                return new ObjectMapper()
+                        .readerFor(new TypeReference<List<HouseTradeDTO>>() {
+                        }).readValue(item);
+            } else {
+                houseTradeDTOList.add(new ObjectMapper()
+                        .readerFor(new TypeReference<HouseTradeDTO>() {
+                        }).readValue(item));
+                return houseTradeDTOList;
+            }
         } catch (Exception e) {
             log.error("[" + LawdCode + "] 단독/다가구 거래 데이터 없음");
         }
-        return new ArrayList<>();
+        return houseTradeDTOList;
     }
 }
